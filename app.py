@@ -6,7 +6,7 @@ from botocore.config import Config
 
 # ---------- Configuration ----------
 AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
-MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "meta.llama3-1-8b-instruct")
+MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "meta.llama3-1-8b-instruct-v1:0")
 
 DEFAULT_TEMP = float(os.environ.get("BEDROCK_TEMP", "0.7"))
 DEFAULT_MAX_TOKENS = int(os.environ.get("BEDROCK_MAX_TOKENS", "512"))
