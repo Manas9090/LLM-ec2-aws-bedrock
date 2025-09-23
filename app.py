@@ -34,9 +34,7 @@ if st.button("Generate"):
         st.info("Invoking Llama 3.1–8B Instruct on Bedrock...")
 
         body = {
-            "messages": [
-                {"role": "user", "content": prompt}
-            ],
+            "prompt": prompt,       # ✅ Llama expects a single prompt
             "max_gen_len": max_tokens,
             "temperature": temperature,
             "top_p": 0.9
@@ -47,17 +45,17 @@ if st.button("Generate"):
                 modelId=MODEL_ID,
                 contentType="application/json",
                 accept="application/json",
-                body=json.dumps(body).encode("utf-8"),
+                body=json.dumps(body),
             )
 
             raw = response["body"].read().decode("utf-8")
             parsed = json.loads(raw)
 
-            # Bedrock Llama models return under "generation"
+            # ✅ Llama response contains "generation"
             if "generation" in parsed:
                 st.success(parsed["generation"])
-            elif "outputs" in parsed:
-                st.success(parsed["outputs"][0]["content"][0]["text"])
+            elif "generations" in parsed:
+                st.success(parsed["generations"][0]["text"])
             else:
                 st.write(parsed)
 
