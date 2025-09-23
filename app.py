@@ -1,35 +1,28 @@
 import boto3
 import json
 
-prompt_data = """
-Act as Shakespeare and write a poem on Generative AI
-"""
-
-# Bedrock client
+# Create the Bedrock Runtime client in us-east-1
 bedrock = boto3.client("bedrock-runtime", region_name="us-east-1")
 
-# Inference profile ARN for your account
-model_id = "arn:aws:bedrock:us-east-1:491085388405:inference-profile/meta.llama2-70b-chat-v1:0"
+# Pick a model you have access to (from console)
+model_id = "meta.llama3-8b-instruct-v1:0"
 
-# Request payload
+prompt = "Act as Shakespeare and write a 4-line poem about Generative AI."
+
 payload = {
-    "prompt": "[INST]" + prompt_data + "[/INST]",
-    "max_gen_len": 512,
-    "temperature": 0.5,
+    "prompt": f"[INST] {prompt} [/INST]",
+    "max_gen_len": 256,
+    "temperature": 0.7,
     "top_p": 0.9
 }
 
-body = json.dumps(payload)
-
-# Invoke the model
 response = bedrock.invoke_model(
-    body=body.encode("utf-8"),
+    body=json.dumps(payload),
     modelId=model_id,
     accept="application/json",
     contentType="application/json"
 )
 
-# Parse and print
-response_body = json.loads(response.get("body").read())
-response_text = response_body["generation"]
-print(response_text)
+response_body = json.loads(response["body"].read())
+print("\n===== Model Response =====\n")
+print(response_body["generation"])
