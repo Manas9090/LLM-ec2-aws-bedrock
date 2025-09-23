@@ -6,7 +6,10 @@ from botocore.config import Config
 
 # ---------- Configuration ----------
 AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
-MODEL_ID = os.environ.get("BEDROCK_MODEL_ID", "meta.llama3-1-8b-instruct-v1:0")
+MODEL_ID = os.environ.get(
+    "BEDROCK_MODEL_ID",
+    "arn:aws:bedrock:us-east-1:491085388405:inference-profile/us.anthropic.claude-3-sonnet-20240229-v1:0"
+)
 
 DEFAULT_TEMP = float(os.environ.get("BEDROCK_TEMP", "0.7"))
 DEFAULT_MAX_TOKENS = int(os.environ.get("BEDROCK_MAX_TOKENS", "512"))
@@ -16,10 +19,14 @@ boto_config = Config(region_name=AWS_REGION, retries={"max_attempts": 3})
 bedrock = boto3.client("bedrock-runtime", config=boto_config)
 
 # ---------- Streamlit UI ----------
-st.set_page_config(page_title="🦙 Llama 3.1–8B Instruct", layout="centered")
-st.title("🦙 Llama 3.1–8B Instruct on Amazon Bedrock")
+st.set_page_config(page_title="🤖 Claude 3 Sonnet", layout="centered")
+st.title("🤖 Claude 3 Sonnet on Amazon Bedrock")
 
-prompt = st.text_area("Your question:", value="Explain object-oriented programming in simple terms.", height=150)
+prompt = st.text_area(
+    "Your question:",
+    value="Explain object-oriented programming in simple terms.",
+    height=150
+)
 
 col1, col2 = st.columns([1, 1])
 with col1:
@@ -31,11 +38,11 @@ if st.button("Generate"):
     if not prompt.strip():
         st.warning("Please enter a prompt.")
     else:
-        st.info("Invoking Llama 3.1–8B Instruct on Bedrock...")
+        st.info("Invoking Claude 3 Sonnet on Bedrock...")
 
         body = {
-            "prompt": prompt,       # ✅ Llama expects a single prompt
-            "max_gen_len": max_tokens,
+            "input_text": prompt,          # Claude models expect 'input_text'
+            "max_tokens_to_sample": max_tokens,
             "temperature": temperature,
             "top_p": 0.9
         }
@@ -51,11 +58,11 @@ if st.button("Generate"):
             raw = response["body"].read().decode("utf-8")
             parsed = json.loads(raw)
 
-            # ✅ Llama response contains "generation"
-            if "generation" in parsed:
-                st.success(parsed["generation"])
-            elif "generations" in parsed:
-                st.success(parsed["generations"][0]["text"])
+            # Claude response usually under "completion"
+            if "completion" in parsed:
+                st.success(parsed["completion"])
+            elif "outputs" in parsed:
+                st.success(parsed["outputs"][0]["content"][0]["text"])
             else:
                 st.write(parsed)
 
